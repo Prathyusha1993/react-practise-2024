@@ -6,79 +6,86 @@ const TodoComp = () => {
   const [editIndex, setEditIndex] = useState(null);
   const [editInput, setEditInput] = useState("");
 
-  const handleInputTodo = (e) => setTodo(e.target.value);
+  const handleTodoInput = (e) => setTodo(e.target.value);
 
-  const handleAddTodo = (e) => {
+  const handleAddTodoSubmit = (e) => {
     e.preventDefault();
     if (!todo.trim()) return;
-    setTodoList([...todoList, todo]);
+    setTodoList([...todoList, { text: todo, completed: false }]);
     setTodo("");
   };
 
-  const handleDeleteTodo = (index) => {
-    setTodoList(todoList.filter((todos, i) => i !== index));
+  const handleDelete = (index) => {
+    setTodoList(todoList.filter((_, i) => i !== index));
   };
 
-  const handleEditInput = (e) => setEditInput(e.target.value);
+  const handleEditTodoInput = (e) => setEditInput(e.target.value);
 
   const handleEditSubmit = (e, index) => {
     e.preventDefault();
     if (!editInput.trim()) return;
     const newTodos = todoList.map((todo, i) =>
-      i === index ? editInput : todo
+      i === index ? { ...todo, text: editInput } : todo
     );
     setTodoList(newTodos);
-    CancelEditing();
+    cancelEditing();
   };
 
-  const startEditing = (index) => {
-    setEditIndex(index);
-    setEditInput(todoList[index]);
-  };
-
-  const CancelEditing = () => {
+  const cancelEditing = () => {
     setEditIndex(null);
     setEditInput("");
   };
 
+  const startEditing = (index) => {
+    setEditIndex(index);
+    setEditInput(todoList[index].text);
+  };
+
+  const toggleCompleted = (index) => {
+    const newTodos = todoList.map((todo, i) =>
+      i === index ? { ...todo, completed: !todo.completed } : todo
+    );
+    setTodoList(newTodos);
+  };
+
   return (
     <div className="todo-container">
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <form onSubmit={handleAddTodo}>
-          <input
-            placeholder="Enter Your Task"
-            type="text"
-            value={todo}
-            onChange={handleInputTodo}
-          />
-          <button type="submit">Add Todo</button>
-        </form>
-      </div>
-
+      <h4>TODO LIST APP</h4>
+      {/* <div> */}
+      <form onSubmit={handleAddTodoSubmit}>
+        <input
+          type="text"
+          placeholder="Enter Your Task"
+          value={todo}
+          onChange={handleTodoInput}
+        />
+        <button type="submit">Add Todo</button>
+      </form>
+      {/* </div> */}
       <ul style={{ display: "flex", justifyContent: "center" }}>
         {todoList.map((todos, index) => {
           return (
-            <li key={index} className="list-todo">
+            <li key={index} className={todo.completed ? "completed" : ""}>
               {editIndex === index ? (
                 <form onSubmit={(e) => handleEditSubmit(e, index)}>
                   <input
                     type="text"
-                    placeholder="Edit your task"
+                    placeholder="Edit Your Task"
                     value={editInput}
-                    onChange={handleEditInput}
+                    onChange={handleEditTodoInput}
                   />
                   <button type="submit">Save</button>
-                  <button type="button" onClick={CancelEditing}>
+                  <button type="button" onClick={cancelEditing}>
                     Cancel
                   </button>
                 </form>
               ) : (
                 <>
-                  {todos}
+                  <span onClick={() => toggleCompleted(index)}>
+                    {todos.text}
+                  </span>
                   <button onClick={() => startEditing(index)}>Edit</button>
-                  <button onClick={() => handleDeleteTodo(index)}>
-                    Delete
-                  </button>
+                  <button onClick={() => handleDelete(index)}>Delete</button>
                 </>
               )}
             </li>
